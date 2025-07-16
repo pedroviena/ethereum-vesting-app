@@ -1,13 +1,17 @@
 import { motion } from "framer-motion";
-import { Coins, Lock, AlertCircle, Loader2 } from "lucide-react";
+import { Coins, Lock, AlertCircle, Loader2, Network, DollarSign } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useWallet } from "@/hooks/use-wallet";
-import { useVestingContractInfo } from "@/hooks/use-web3-vesting";
+import { useVestingContractInfo, useNetworkValidation } from "@/hooks/use-web3-vesting";
 import { Web3VestingCard } from "@/components/web3-vesting-card";
+import { FEE_AMOUNT } from "@/lib/web3";
+import { formatEther } from "viem";
 
 export default function Web3Dashboard() {
   const { isConnected, walletAddress } = useWallet();
+  const { isValidNetwork, currentNetwork } = useNetworkValidation();
   const { data: contractInfo, isLoading, error } = useVestingContractInfo(walletAddress);
 
   if (!isConnected) {
@@ -109,9 +113,56 @@ export default function Web3Dashboard() {
       >
         <h2 className="text-3xl font-bold mb-4">Your Web3 Vesting Contract</h2>
         <p className="text-muted-foreground">
-          Connected to smart contract on Sepolia Testnet
+          Connected to smart contract on {currentNetwork?.name || 'Sepolia Testnet'}
         </p>
       </motion.div>
+
+      {/* Network Status */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <Card className="hover-lift transition-all duration-300">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3">
+              <Network className="w-8 h-8 text-blue-500" />
+              <div>
+                <p className="text-sm font-medium">Network</p>
+                <div className="flex items-center space-x-2">
+                  <Badge variant={isValidNetwork ? "default" : "destructive"}>
+                    {currentNetwork?.name || "Unknown"}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover-lift transition-all duration-300">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3">
+              <DollarSign className="w-8 h-8 text-green-500" />
+              <div>
+                <p className="text-sm font-medium">Transaction Fee</p>
+                <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                  {formatEther(FEE_AMOUNT)} ETH
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover-lift transition-all duration-300">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3">
+              <Coins className="w-8 h-8 text-purple-500" />
+              <div>
+                <p className="text-sm font-medium">Wallet</p>
+                <p className="text-sm text-muted-foreground">
+                  {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="max-w-2xl mx-auto">
         <Web3VestingCard />

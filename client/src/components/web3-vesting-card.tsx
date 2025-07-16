@@ -7,18 +7,28 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Confetti } from "@/components/confetti";
-import { useVestingContractInfo, useClaimVestedTokens } from "@/hooks/use-web3-vesting";
+import { useVestingContractInfo, useClaimVestedTokens, useNetworkValidation } from "@/hooks/use-web3-vesting";
 import { useWallet } from "@/hooks/use-wallet";
 
 export function Web3VestingCard() {
   const [showConfetti, setShowConfetti] = useState(false);
   const { walletAddress } = useWallet();
   const { toast } = useToast();
+  const { isValidNetwork, currentNetwork } = useNetworkValidation();
   
   const { data: contractInfo, isLoading, error } = useVestingContractInfo(walletAddress);
-  const { claimTokens, isPending, isConfirming, isSuccess, error: claimError } = useClaimVestedTokens();
+  const { claimTokens, isPending, isConfirming, isSuccess, error: claimError, hash } = useClaimVestedTokens();
 
   const handleClaim = async () => {
+    if (!isValidNetwork) {
+      toast({
+        title: "Wrong Network",
+        description: "Please switch to Sepolia testnet to claim tokens.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!contractInfo || parseFloat(contractInfo.releasableAmount) <= 0) return;
 
     try {
@@ -30,6 +40,7 @@ export function Web3VestingCard() {
         description: "Your claim transaction has been submitted to the blockchain.",
       });
     } catch (error) {
+      console.error('Claim transaction failed:', error);
       toast({
         title: "Transaction Failed",
         description: "Failed to submit claim transaction. Please try again.",
@@ -131,8 +142,12 @@ export function Web3VestingCard() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold">{totalTokens.toLocaleString()}</div>
-                <div className="text-sm text-muted-foreground">Total Tokens</div>
+                <div className="text-2xl font-bold">
+                  {totalTokens.toLocaleString()} {contractInfo.tokenInfo.symbol}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Total Allocation
+                </div>
               </div>
             </div>
 
@@ -217,6 +232,32 @@ export function Web3VestingCard() {
                 </>
               )}
             </Button>
+
+            {hash && (
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                <div className="flex items-center space-x-2 text-green-700 dark:text-green-300 text-sm">
+                  <Check className="w-4 h-4" />
+                  <span className="font-medium">Transaction Hash:</span>
+                  <a 
+                    href={`${currentNetwork?.blockExplorer || 'https://sepolia.etherscan.io'}/tx/${hash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                  >
+                    {hash.slice(0, 8)}...{hash.slice(-6)}
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {!isValidNetwork && (
+              <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                <div className="flex items-center space-x-2 text-yellow-700 dark:text-yellow-300 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>Please switch to Sepolia testnet to use this feature</span>
+                </div>
+              </div>
+            )}
 
             {claimError && (
               <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">

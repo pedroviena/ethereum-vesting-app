@@ -1,7 +1,9 @@
-import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount, useChainId } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
-import { useQuery } from '@tanstack/react-query';
-import { VESTING_CONTRACT_ABI, VESTING_CONTRACT_ADDRESS, formatTokenAmount } from '@/lib/web3';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { VESTING_CONTRACT_ABI, ERC20_ABI, FACTORY_ABI } from '@/lib/abis';
+import { VESTING_CONTRACT_ADDRESS, FACTORY_ADDRESS, FEE_RECIPIENT, FEE_AMOUNT, GAS_LIMIT, formatTokenAmount, SUPPORTED_NETWORKS } from '@/lib/web3';
 
 export interface VestingContractInfo {
   totalAllocation: string;
@@ -12,11 +14,45 @@ export interface VestingContractInfo {
   duration: number;
   cliffDuration: number;
   isActive: boolean;
+  beneficiary: `0x${string}`;
+  token: `0x${string}`;
+  revocable: boolean;
+  revoked: boolean;
+  tokenInfo: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+}
+
+export function useNetworkValidation() {
+  const chainId = useChainId();
+  const { toast } = useToast();
+  
+  const isValidNetwork = chainId === 1 || chainId === 11155111; // Mainnet or Sepolia
+  const currentNetwork = Object.values(SUPPORTED_NETWORKS).find(n => n.id === chainId);
+  
+  const validateNetwork = () => {
+    if (!isValidNetwork) {
+      toast({
+        title: "Wrong Network",
+        description: `Please switch to ${SUPPORTED_NETWORKS.sepolia.name} to use this dApp.`,
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
+  return { isValidNetwork, currentNetwork, validateNetwork };
 }
 
 export function useVestingContractInfo(walletAddress: `0x${string}` | undefined) {
+  const { validateNetwork } = useNetworkValidation();
+  const { toast } = useToast();
+
   // Read contract data
-  const { data: totalAllocation } = useReadContract({
+  const { data: totalAllocation, error: allocationError } = useReadContract({
     address: VESTING_CONTRACT_ADDRESS,
     abi: VESTING_CONTRACT_ABI,
     functionName: 'getTotalAllocation',
@@ -68,41 +104,142 @@ export function useVestingContractInfo(walletAddress: `0x${string}` | undefined)
     query: { enabled: !!walletAddress }
   });
 
+  const { data: beneficiary } = useReadContract({
+    address: VESTING_CONTRACT_ADDRESS,
+    abi: VESTING_CONTRACT_ABI,
+    functionName: 'getBeneficiary',
+    query: { enabled: !!walletAddress }
+  });
+
+  const { data: token } = useReadContract({
+    address: VESTING_CONTRACT_ADDRESS,
+    abi: VESTING_CONTRACT_ABI,
+    functionName: 'getToken',
+    query: { enabled: !!walletAddress }
+  });
+
+  const { data: revocable } = useReadContract({
+    address: VESTING_CONTRACT_ADDRESS,
+    abi: VESTING_CONTRACT_ABI,
+    functionName: 'getRevocable',
+    query: { enabled: !!walletAddress }
+  });
+
+  const { data: revoked } = useReadContract({
+    address: VESTING_CONTRACT_ADDRESS,
+    abi: VESTING_CONTRACT_ABI,
+    functionName: 'getRevoked',
+    query: { enabled: !!walletAddress }
+  });
+
+  // Token info
+  const { data: tokenName } = useReadContract({
+    address: token,
+    abi: ERC20_ABI,
+    functionName: 'name',
+    query: { enabled: !!token }
+  });
+
+  const { data: tokenSymbol } = useReadContract({
+    address: token,
+    abi: ERC20_ABI,
+    functionName: 'symbol',
+    query: { enabled: !!token }
+  });
+
+  const { data: tokenDecimals } = useReadContract({
+    address: token,
+    abi: ERC20_ABI,
+    functionName: 'decimals',
+    query: { enabled: !!token }
+  });
+
   return useQuery({
-    queryKey: ['vestingContract', walletAddress, totalAllocation, vestedAmount, releasableAmount, releasedAmount, startTime, duration, cliffDuration],
+    queryKey: ['vestingContract', walletAddress, totalAllocation, vestedAmount, releasableAmount, releasedAmount, startTime, duration, cliffDuration, beneficiary, token, revocable, revoked, tokenName, tokenSymbol, tokenDecimals],
     queryFn: (): VestingContractInfo => {
-      if (!totalAllocation || !vestedAmount || !releasableAmount || !releasedAmount || !startTime || !duration || !cliffDuration) {
+      if (!validateNetwork()) {
+        throw new Error('Invalid network');
+      }
+
+      if (!totalAllocation || !vestedAmount || !releasableAmount || !releasedAmount || !startTime || !duration || !cliffDuration || !beneficiary || !token) {
         throw new Error('Contract data not available');
       }
 
       return {
-        totalAllocation: formatTokenAmount(totalAllocation),
-        vestedAmount: formatTokenAmount(vestedAmount),
-        releasableAmount: formatTokenAmount(releasableAmount),
-        releasedAmount: formatTokenAmount(releasedAmount),
+        totalAllocation: formatTokenAmount(totalAllocation, tokenDecimals || 18),
+        vestedAmount: formatTokenAmount(vestedAmount, tokenDecimals || 18),
+        releasableAmount: formatTokenAmount(releasableAmount, tokenDecimals || 18),
+        releasedAmount: formatTokenAmount(releasedAmount, tokenDecimals || 18),
         startTime: Number(startTime),
         duration: Number(duration),
         cliffDuration: Number(cliffDuration),
-        isActive: Number(releasableAmount) > 0 || Number(vestedAmount) > 0
+        isActive: Number(releasableAmount) > 0 || Number(vestedAmount) > 0,
+        beneficiary,
+        token,
+        revocable: !!revocable,
+        revoked: !!revoked,
+        tokenInfo: {
+          name: tokenName || 'Unknown Token',
+          symbol: tokenSymbol || 'UNK',
+          decimals: tokenDecimals || 18,
+        }
       };
     },
-    enabled: !!walletAddress && !!totalAllocation && !!vestedAmount && !!releasableAmount && !!releasedAmount && !!startTime && !!duration && !!cliffDuration
+    enabled: !!walletAddress && !!totalAllocation && !!vestedAmount && !!releasableAmount && !!releasedAmount && !!startTime && !!duration && !!cliffDuration && !!beneficiary && !!token,
+    retry: 3,
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000, // 1 minute
   });
 }
 
 export function useClaimVestedTokens() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { validateNetwork } = useNetworkValidation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
 
   const claimTokens = async () => {
-    writeContract({
-      address: VESTING_CONTRACT_ADDRESS,
-      abi: VESTING_CONTRACT_ABI,
-      functionName: 'release',
+    if (!validateNetwork()) {
+      throw new Error('Invalid network');
+    }
+
+    // Log transaction attempt
+    console.log('Initiating token claim transaction...');
+    toast({
+      title: "Submitting Transaction",
+      description: "Preparing to claim your vested tokens...",
     });
+
+    try {
+      writeContract({
+        address: VESTING_CONTRACT_ADDRESS,
+        abi: VESTING_CONTRACT_ABI,
+        functionName: 'release',
+        value: FEE_AMOUNT, // Include fee for each transaction
+        gas: GAS_LIMIT,
+      });
+
+      // Log successful submission
+      console.log('Transaction submitted successfully');
+      
+      // Invalidate relevant queries after successful submission
+      queryClient.invalidateQueries({ 
+        queryKey: ['vestingContract'] 
+      });
+      
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      toast({
+        title: "Transaction Failed",
+        description: "Failed to submit claim transaction. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   return {
@@ -115,18 +252,28 @@ export function useClaimVestedTokens() {
   };
 }
 
-// Hook for multiple vesting contracts (if user has multiple)
-export function useMultipleVestingContracts(walletAddress: `0x${string}` | undefined, contractAddresses: `0x${string}`[]) {
+// Hook for multiple vesting contracts from factory
+export function useMultipleVestingContracts(walletAddress: `0x${string}` | undefined) {
+  const { validateNetwork } = useNetworkValidation();
+
+  const { data: contractAddresses } = useReadContract({
+    address: FACTORY_ADDRESS,
+    abi: FACTORY_ABI,
+    functionName: 'getVestingContracts',
+    args: walletAddress ? [walletAddress] : undefined,
+    query: { enabled: !!walletAddress }
+  });
+
   return useQuery({
     queryKey: ['multipleVestingContracts', walletAddress, contractAddresses],
     queryFn: async () => {
-      if (!walletAddress || !contractAddresses.length) return [];
+      if (!validateNetwork() || !walletAddress || !contractAddresses?.length) return [];
 
-      // This would typically call a factory contract or use a subgraph
-      // For now, we'll return the single contract configured
+      console.log(`Found ${contractAddresses.length} vesting contracts for ${walletAddress}`);
+      
       return contractAddresses.map(address => ({
         address,
-        // This would be populated by actual contract calls
+        // Additional contract data would be fetched here
         totalAllocation: '0',
         vestedAmount: '0',
         releasableAmount: '0',
@@ -137,6 +284,79 @@ export function useMultipleVestingContracts(walletAddress: `0x${string}` | undef
         isActive: false
       }));
     },
-    enabled: !!walletAddress && contractAddresses.length > 0
+    enabled: !!walletAddress && !!contractAddresses?.length,
+    staleTime: 60000, // 1 minute
   });
+}
+
+// Hook for creating new vesting contracts
+export function useCreateVestingContract() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { validateNetwork } = useNetworkValidation();
+
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  const createContract = async (params: {
+    beneficiary: `0x${string}`;
+    start: number;
+    cliffDuration: number;
+    duration: number;
+    revocable: boolean;
+    token: `0x${string}`;
+  }) => {
+    if (!validateNetwork()) {
+      throw new Error('Invalid network');
+    }
+
+    console.log('Creating new vesting contract...', params);
+    toast({
+      title: "Creating Vesting Contract",
+      description: "Submitting transaction to create new vesting contract...",
+    });
+
+    try {
+      writeContract({
+        address: FACTORY_ADDRESS,
+        abi: FACTORY_ABI,
+        functionName: 'createVestingContract',
+        args: [
+          params.beneficiary,
+          BigInt(params.start),
+          BigInt(params.cliffDuration),
+          BigInt(params.duration),
+          params.revocable,
+          params.token,
+        ],
+        value: FEE_AMOUNT, // Include fee for contract creation
+        gas: GAS_LIMIT,
+      });
+
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ 
+        queryKey: ['multipleVestingContracts'] 
+      });
+      
+    } catch (error) {
+      console.error('Contract creation failed:', error);
+      toast({
+        title: "Contract Creation Failed",
+        description: "Failed to create vesting contract. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  return {
+    createContract,
+    hash,
+    isPending,
+    isConfirming,
+    isSuccess,
+    error
+  };
 }
