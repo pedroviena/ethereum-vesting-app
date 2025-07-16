@@ -16,8 +16,21 @@ import Web3Dashboard from "@/pages/web3-dashboard";
 import NotFound from "@/pages/not-found";
 import { config } from "@/lib/web3";
 import { useState } from "react";
+import Help from "@/pages/help";
+import TermsAndPrivacy from "./pages/terms";
+import * as Sentry from "@sentry/react";
 
-function Navigation({ isWeb3Mode, setIsWeb3Mode }: { isWeb3Mode: boolean; setIsWeb3Mode: (mode: boolean) => void }) {
+Sentry.init({
+  dsn: "https://examplePublicKey@o0.ingest.sentry.io/0", // Troque pelo seu DSN real
+  integrations: [
+    new Sentry.BrowserTracing(),
+    new Sentry.Replay(),
+  ],
+  tracesSampleRate: 1.0,
+  environment: import.meta.env.MODE,
+});
+
+function Navigation() {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -34,16 +47,9 @@ function Navigation({ isWeb3Mode, setIsWeb3Mode }: { isWeb3Mode: boolean; setIsW
             </div>
             <div className="text-xl font-bold">VestFlow</div>
           </motion.div>
-          
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsWeb3Mode(!isWeb3Mode)}
-              className="hover-lift"
-            >
-              {isWeb3Mode ? "Mock Mode" : "Web3 Mode"}
-            </Button>
+            <a href="/help" className="text-sm font-medium text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded px-2 py-1">Help</a>
+            <a href="/terms" className="text-sm font-medium text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded px-2 py-1">Terms & Privacy</a>
             <Button
               variant="ghost"
               size="icon"
@@ -65,12 +71,9 @@ function Navigation({ isWeb3Mode, setIsWeb3Mode }: { isWeb3Mode: boolean; setIsW
 }
 
 function AppContent() {
-  const [isWeb3Mode, setIsWeb3Mode] = useState(false);
-
   return (
     <div className="min-h-screen bg-background">
-      <Navigation isWeb3Mode={isWeb3Mode} setIsWeb3Mode={setIsWeb3Mode} />
-      
+      <Navigation />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -79,15 +82,13 @@ function AppContent() {
         >
           <h1 className="text-4xl font-bold mb-4">Token Vesting Dashboard</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            {isWeb3Mode 
-              ? "Connect your wallet and claim tokens directly from smart contracts"
-              : "Manage your vesting contracts and claim tokens seamlessly on Ethereum"
-            }
+            Connect your wallet and claim tokens directly from smart contracts on Ethereum
           </p>
         </motion.div>
-
         <Switch>
-          <Route path="/" component={isWeb3Mode ? Web3Dashboard : Dashboard} />
+          <Route path="/" component={Web3Dashboard} />
+          <Route path="/help" component={Help} />
+          <Route path="/terms" component={TermsAndPrivacy} />
           <Route component={NotFound} />
         </Switch>
       </main>

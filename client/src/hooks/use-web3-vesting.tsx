@@ -200,6 +200,20 @@ export function useClaimVestedTokens() {
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
+    onSettled(data, error) {
+      if (error) {
+        toast({
+          title: "Transaction Failed",
+          description: "Failed to claim tokens. Please try again.",
+          variant: "destructive",
+        });
+      } else if (data && data.status === 'success') {
+        toast({
+          title: "Tokens Claimed Successfully!",
+          description: "Your tokens have been successfully claimed and transferred to your wallet.",
+        });
+      }
+    },
   });
 
   const claimTokens = async () => {
@@ -207,11 +221,9 @@ export function useClaimVestedTokens() {
       throw new Error('Invalid network');
     }
 
-    // Log transaction attempt
-    console.log('Initiating token claim transaction...');
     toast({
-      title: "Submitting Transaction",
-      description: "Preparing to claim your vested tokens...",
+      title: "Transaction Submitted",
+      description: "Waiting for confirmation on the blockchain...",
     });
 
     try {
@@ -223,16 +235,12 @@ export function useClaimVestedTokens() {
         gas: GAS_LIMIT,
       });
 
-      // Log successful submission
-      console.log('Transaction submitted successfully');
-      
       // Invalidate relevant queries after successful submission
       queryClient.invalidateQueries({ 
         queryKey: ['vestingContract'] 
       });
-      
+      // O toast de sucesso será disparado pelo onSettled do useWaitForTransactionReceipt
     } catch (error) {
-      console.error('Transaction failed:', error);
       toast({
         title: "Transaction Failed",
         description: "Failed to submit claim transaction. Please try again.",
@@ -298,6 +306,20 @@ export function useCreateVestingContract() {
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
+    onSettled(data, error) {
+      if (error) {
+        toast({
+          title: "Transaction Failed",
+          description: "Failed to create vesting contract. Please try again.",
+          variant: "destructive",
+        });
+      } else if (data && data.status === 'success') {
+        toast({
+          title: "Vesting Contract Created!",
+          description: "Your vesting contract was created successfully.",
+        });
+      }
+    },
   });
 
   const createContract = async (params: {
@@ -312,10 +334,9 @@ export function useCreateVestingContract() {
       throw new Error('Invalid network');
     }
 
-    console.log('Creating new vesting contract...', params);
     toast({
-      title: "Creating Vesting Contract",
-      description: "Submitting transaction to create new vesting contract...",
+      title: "Transaction Submitted",
+      description: "Waiting for confirmation on the blockchain...",
     });
 
     try {
@@ -339,9 +360,8 @@ export function useCreateVestingContract() {
       queryClient.invalidateQueries({ 
         queryKey: ['multipleVestingContracts'] 
       });
-      
+      // O toast de sucesso será disparado pelo onSettled do useWaitForTransactionReceipt
     } catch (error) {
-      console.error('Contract creation failed:', error);
       toast({
         title: "Contract Creation Failed",
         description: "Failed to create vesting contract. Please try again.",

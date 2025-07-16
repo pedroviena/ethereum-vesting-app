@@ -20,10 +20,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   const connectWallet = async () => {
     try {
-      // Connect to the first available connector (usually MetaMask)
-      const connector = connectors.find(c => c.id === 'injected') || connectors[0];
+      // Prioriza o connector metaMask, depois injected, depois o primeiro disponível
+      const connector = connectors.find(c => c.id === 'metaMask') 
+        || connectors.find(c => c.id === 'injected') 
+        || connectors[0];
       if (connector) {
-        connect({ connector });
+        await connect({ connector }); // Aguarda a Promise
       }
     } catch (error) {
       toast({

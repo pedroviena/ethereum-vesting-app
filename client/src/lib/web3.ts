@@ -1,6 +1,6 @@
 import { createConfig, http } from 'wagmi';
 import { sepolia, mainnet } from 'wagmi/chains';
-import { injected, walletConnect } from 'wagmi/connectors';
+import { injected, walletConnect, metaMask } from 'wagmi/connectors';
 import { parseEther } from 'viem';
 
 // Contract addresses from environment variables
@@ -38,6 +38,7 @@ export const config = createConfig({
     walletConnect({
       projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'default-project-id',
     }),
+    metaMask(), // Adicionado connector MetaMask
   ],
   transports: {
     [sepolia.id]: http(SEPOLIA_URL),
