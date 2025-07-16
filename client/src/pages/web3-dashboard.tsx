@@ -292,15 +292,31 @@ export default function Web3Dashboard() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      {/* Header com botão de criar vesting */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-4">Your Web3 Vesting Contract</h2>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Connected to smart contract on {currentNetwork?.name || 'Sepolia Testnet'}
-        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6">
+          <div className="flex-1">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-4">Your Web3 Vesting Contract</h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Connected to smart contract on {currentNetwork?.name || 'Sepolia Testnet'}
+            </p>
+          </div>
+          {isConnected && (
+            <Button 
+              onClick={() => setShowForm(f => !f)} 
+              className="hover-lift focus-visible:ring-2 focus-visible:ring-primary text-sm sm:text-base mt-4 sm:mt-0"
+              aria-label={showForm ? "Cancel" : "Create Vesting"}
+              size="lg"
+            >
+              <Coins className="mr-2 h-4 w-4" />
+              {showForm ? "Cancel" : "Create Vesting"}
+            </Button>
+          )}
+        </div>
       </motion.div>
 
       {/* Network Banner */}
@@ -346,6 +362,7 @@ export default function Web3Dashboard() {
                 <p className="text-sm sm:text-lg font-bold text-green-600 dark:text-green-400">
                   {formatEther(FEE_AMOUNT)} ETH
                 </p>
+                <p className="text-xs text-muted-foreground">Per transaction</p>
               </div>
             </div>
           </CardContent>
@@ -454,14 +471,7 @@ export default function Web3Dashboard() {
         )}
       </div>
 
-      {/* Botão e formulário de criação SEMPRE visíveis para conectados */}
-      {isConnected && (
-        <div className="mb-4 sm:mb-6 flex justify-end">
-          <Button onClick={() => setShowForm(f => !f)} className="hover-lift focus-visible:ring-2 focus-visible:ring-primary text-sm sm:text-base" aria-label={showForm ? "Cancel" : "Create Vesting"}>
-            {showForm ? "Cancel" : "Create Vesting"}
-          </Button>
-        </div>
-      )}
+      {/* Formulário de criação */}
       {showForm && (
         <Card className="mb-6 sm:mb-8 max-w-xl mx-auto shadow-lg border-primary/30">
           <CardContent className="p-4 sm:p-6">
@@ -591,6 +601,26 @@ export default function Web3Dashboard() {
               </div>
               {isSuccess && <div className="text-green-600 mt-2 text-sm">Vesting contract created successfully!</div>}
             </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Informações sobre taxas */}
+      {showForm && (
+        <Card className="mb-6 sm:mb-8 max-w-xl mx-auto shadow-lg border-blue-500/30 bg-blue-50 dark:bg-blue-950/20">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-start gap-3">
+              <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Transaction Fees</h4>
+                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                  <li>• <strong>0.001 ETH</strong> fee per vesting contract creation</li>
+                  <li>• <strong>0.001 ETH</strong> fee per token claim transaction</li>
+                  <li>• Fees are automatically sent to: <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded text-xs">{FEE_RECIPIENT?.slice(0, 6)}...{FEE_RECIPIENT?.slice(-4)}</code></li>
+                  <li>• Gas fees are additional and paid separately</li>
+                </ul>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
