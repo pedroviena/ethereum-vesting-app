@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import { useConnect, useDisconnect, useAccount } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WalletContextValue {
   isConnected: boolean;
@@ -17,20 +18,47 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const connectWallet = async () => {
     try {
-      // Prioriza o connector metaMask, depois injected, depois o primeiro disponível
-      const connector = connectors.find(c => c.id === 'metaMask') 
-        || connectors.find(c => c.id === 'injected') 
-        || connectors[0];
-      if (connector) {
-        await connect({ connector }); // Aguarda a Promise
+      let connector;
+      
+      if (isMobile) {
+        // No mobile, prioriza WalletConnect, depois MetaMask, depois injected
+        connector = connectors.find(c => c.id === 'walletConnect') 
+          || connectors.find(c => c.id === 'metaMask') 
+          || connectors.find(c => c.id === 'injected') 
+          || connectors[0];
+      } else {
+        // No desktop, prioriza MetaMask, depois injected, depois WalletConnect
+        connector = connectors.find(c => c.id === 'metaMask') 
+          || connectors.find(c => c.id === 'injected') 
+          || connectors.find(c => c.id === 'walletConnect') 
+          || connectors[0];
       }
-    } catch (error) {
+
+      if (connector) {
+        await connect({ connector });
+      } else {
+        throw new Error('No wallet connector available');
+      }
+    } catch (error: any) {
+      console.error('Wallet connection error:', error);
+      
+      let errorMessage = "Failed to connect wallet. Please try again.";
+      
+      if (error.message?.includes('User rejected')) {
+        errorMessage = "Connection was cancelled by user.";
+      } else if (error.message?.includes('No wallet connector available')) {
+        errorMessage = "No wallet found. Please install MetaMask or another Web3 wallet.";
+      } else if (error.message?.includes('network')) {
+        errorMessage = "Please switch to Sepolia testnet in your wallet.";
+      }
+      
       toast({
         title: "Connection Failed",
-        description: "Failed to connect wallet. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }

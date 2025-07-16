@@ -223,20 +223,20 @@ export default function Web3Dashboard() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center">
+      <div className="min-h-[80vh] flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center max-w-md mx-auto"
         >
-          <div className="w-64 h-64 mx-auto mb-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-700 rounded-full flex items-center justify-center">
-            <Lock className="w-16 h-16 text-muted-foreground" />
+          <div className="w-48 h-48 sm:w-64 sm:h-64 mx-auto mb-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-700 rounded-full flex items-center justify-center">
+            <Lock className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground" />
           </div>
-          <h3 className="text-2xl font-semibold mb-4">Connect Your Wallet</h3>
-          <p className="text-muted-foreground mb-8">
+          <h3 className="text-xl sm:text-2xl font-semibold mb-4">Connect Your Wallet</h3>
+          <p className="text-muted-foreground mb-8 text-sm sm:text-base">
             Connect your Web3 wallet to view your vesting contracts and claim tokens directly from the blockchain.
           </p>
-          <Button className="hover-lift">
+          <Button className="hover-lift text-sm sm:text-base">
             <Coins className="mr-2 h-4 w-4" />
             Learn More About Web3 Vesting
           </Button>
@@ -247,15 +247,15 @@ export default function Web3Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center">
+      <div className="min-h-[80vh] flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <Loader2 className="w-16 h-16 animate-spin text-primary mx-auto mb-4" />
-          <h3 className="text-2xl font-semibold mb-2">Loading Contract Data</h3>
-          <p className="text-muted-foreground">
+          <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 animate-spin text-primary mx-auto mb-4" />
+          <h3 className="text-xl sm:text-2xl font-semibold mb-2">Loading Contract Data</h3>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Fetching your vesting information from the blockchain...
           </p>
         </motion.div>
@@ -265,15 +265,15 @@ export default function Web3Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center">
+      <div className="min-h-[80vh] flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center max-w-md mx-auto"
         >
-          <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
-          <h3 className="text-2xl font-semibold mb-4">Contract Connection Error</h3>
-          <p className="text-muted-foreground mb-8">
+          <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 text-destructive mx-auto mb-4" />
+          <h3 className="text-xl sm:text-2xl font-semibold mb-4">Contract Connection Error</h3>
+          <p className="text-muted-foreground mb-8 text-sm sm:text-base">
             Unable to connect to the vesting contract. Please check your network connection and try again.
           </p>
           <Button 
@@ -291,44 +291,44 @@ export default function Web3Dashboard() {
   const noActiveVesting = !contractInfo || !contractInfo.isActive;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <h2 className="text-3xl font-bold mb-4">Your Web3 Vesting Contract</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-4">Your Web3 Vesting Contract</h2>
+        <p className="text-muted-foreground text-sm sm:text-base">
           Connected to smart contract on {currentNetwork?.name || 'Sepolia Testnet'}
         </p>
       </motion.div>
 
       {/* Network Banner */}
-      <div className="mb-6 flex flex-col md:flex-row items-center justify-between bg-muted/60 border border-primary/20 rounded-lg px-4 py-2 gap-2">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-center justify-between bg-muted/60 border border-primary/20 rounded-lg px-3 sm:px-4 py-2 gap-2">
         <div className="flex items-center gap-2">
-          <Network className="w-5 h-5 text-primary" />
-          <span className="font-semibold">Current Network:</span>
-          <Badge variant={isValidNetwork ? 'default' : 'destructive'}>
+          <Network className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          <span className="font-semibold text-sm sm:text-base">Current Network:</span>
+          <Badge variant={isValidNetwork ? 'default' : 'destructive'} className="text-xs">
             {currentNetwork?.name || 'Unknown'}
           </Badge>
         </div>
         {!isValidNetwork && (
-          <Button size="sm" variant="destructive" onClick={handleSwitchToSepolia} aria-label="Switch to Sepolia">
+          <Button size="sm" variant="destructive" onClick={handleSwitchToSepolia} aria-label="Switch to Sepolia" className="text-xs">
             Switch to Sepolia
           </Button>
         )}
       </div>
 
       {/* Network Status */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
         <Card className="hover-lift transition-all duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <Network className="w-8 h-8 text-blue-500" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Network className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
               <div>
-                <p className="text-sm font-medium">Network</p>
+                <p className="text-xs sm:text-sm font-medium">Network</p>
                 <div className="flex items-center space-x-2">
-                  <Badge variant={isValidNetwork ? "default" : "destructive"}>
+                  <Badge variant={isValidNetwork ? "default" : "destructive"} className="text-xs">
                     {currentNetwork?.name || "Unknown"}
                   </Badge>
                 </div>
@@ -338,12 +338,12 @@ export default function Web3Dashboard() {
         </Card>
 
         <Card className="hover-lift transition-all duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <DollarSign className="w-8 h-8 text-green-500" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
               <div>
-                <p className="text-sm font-medium">Transaction Fee</p>
-                <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                <p className="text-xs sm:text-sm font-medium">Transaction Fee</p>
+                <p className="text-sm sm:text-lg font-bold text-green-600 dark:text-green-400">
                   {formatEther(FEE_AMOUNT)} ETH
                 </p>
               </div>
@@ -351,13 +351,13 @@ export default function Web3Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="hover-lift transition-all duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <Coins className="w-8 h-8 text-purple-500" />
+        <Card className="hover-lift transition-all duration-300 sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Coins className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" />
               <div>
-                <p className="text-sm font-medium">Wallet</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium">Wallet</p>
+                <p className="text-xs sm:text-sm text-muted-foreground font-mono">
                   {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
                 </p>
               </div>
@@ -371,22 +371,22 @@ export default function Web3Dashboard() {
       </div>
 
       {/* All Vestings Section */}
-      <div className="my-8">
-        <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <Coins className="w-6 h-6 text-primary" />
+      <div className="my-6 sm:my-8">
+        <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+          <Coins className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           All Your Vesting Contracts
         </h3>
         {isLoadingVestings ? (
-          <div className="text-center text-muted-foreground py-8">Loading all vestings...</div>
+          <div className="text-center text-muted-foreground py-6 sm:py-8 text-sm">Loading all vestings...</div>
         ) : errorVestings ? (
-          <div className="text-center text-destructive py-8">Failed to load vestings.</div>
+          <div className="text-center text-destructive py-6 sm:py-8 text-sm">Failed to load vestings.</div>
         ) : allVestings && allVestings.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {allVestings.map((vesting, idx) => (
               <Card key={vesting.address} className="hover-lift border-primary/30 focus-within:ring-2 focus-within:ring-primary">
-                <CardContent className="p-4 space-y-2">
+                <CardContent className="p-3 sm:p-4 space-y-2">
                   <div className="flex items-center gap-2">
-                    <Badge variant={vesting.isActive ? 'default' : 'secondary'}>
+                    <Badge variant={vesting.isActive ? 'default' : 'secondary'} className="text-xs">
                       {vesting.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                     <span className="font-mono text-xs break-all">{vesting.address}</span>
@@ -394,7 +394,7 @@ export default function Web3Dashboard() {
                   <div className="text-xs text-muted-foreground">Start: {vesting.startTime ? new Date(vesting.startTime * 1000).toLocaleDateString() : '-'}</div>
                   <div className="text-xs text-muted-foreground">Duration: {vesting.duration ? (vesting.duration / 86400) + ' days' : '-'}</div>
                   <div className="text-xs text-muted-foreground">Cliff: {vesting.cliffDuration ? (vesting.cliffDuration / 86400) + ' days' : '-'}</div>
-                  <Button size="sm" variant="outline" className="mt-2 w-full focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Details" disabled>
+                  <Button size="sm" variant="outline" className="mt-2 w-full focus-visible:ring-2 focus-visible:ring-primary text-xs" aria-label="View Details" disabled>
                     View Details
                   </Button>
                 </CardContent>
@@ -402,47 +402,47 @@ export default function Web3Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="text-center text-muted-foreground py-8">You have no vesting contracts yet.</div>
+          <div className="text-center text-muted-foreground py-6 sm:py-8 text-sm">You have no vesting contracts yet.</div>
         )}
       </div>
 
       {/* Transaction History Section */}
-      <div className="my-8">
-        <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <Loader2 className="w-6 h-6 text-primary" />
+      <div className="my-6 sm:my-8">
+        <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+          <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           Transaction History
         </h3>
         {isLoadingTxs ? (
-          <div className="text-center text-muted-foreground py-8">Loading transactions...</div>
+          <div className="text-center text-muted-foreground py-6 sm:py-8 text-sm">Loading transactions...</div>
         ) : txError ? (
-          <div className="text-center text-destructive py-8">{txError}</div>
+          <div className="text-center text-destructive py-6 sm:py-8 text-sm">{txError}</div>
         ) : txHistory.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+            <table className="min-w-full text-xs sm:text-sm">
               <thead>
                 <tr className="border-b bg-muted">
-                  <th className="px-2 py-1 text-left">Hash</th>
-                  <th className="px-2 py-1 text-left">Type</th>
-                  <th className="px-2 py-1 text-left">Status</th>
-                  <th className="px-2 py-1 text-left">Block</th>
-                  <th className="px-2 py-1 text-left">Date</th>
-                  <th className="px-2 py-1 text-left">Link</th>
+                  <th className="px-1 sm:px-2 py-1 text-left">Hash</th>
+                  <th className="px-1 sm:px-2 py-1 text-left">Type</th>
+                  <th className="px-1 sm:px-2 py-1 text-left">Status</th>
+                  <th className="px-1 sm:px-2 py-1 text-left hidden sm:table-cell">Block</th>
+                  <th className="px-1 sm:px-2 py-1 text-left hidden sm:table-cell">Date</th>
+                  <th className="px-1 sm:px-2 py-1 text-left">Link</th>
                 </tr>
               </thead>
               <tbody>
                 {txHistory.map(tx => (
                   <tr key={tx.hash} className="border-b hover:bg-muted/30 focus-within:bg-primary/10">
-                    <td className="px-2 py-1 font-mono">{tx.hash.slice(0, 8)}...{tx.hash.slice(-6)}</td>
-                    <td className="px-2 py-1">
+                    <td className="px-1 sm:px-2 py-1 font-mono">{tx.hash.slice(0, 6)}...{tx.hash.slice(-4)}</td>
+                    <td className="px-1 sm:px-2 py-1">
                       {tx.input && tx.input !== '0x' ? (tx.input.startsWith('0xa9059cbb') ? 'Claim' : 'Contract Call') : 'Create/ETH Tx'}
                     </td>
-                    <td className="px-2 py-1">
-                      {tx.isError === "0" ? <Badge variant="default">Success</Badge> : <Badge variant="destructive">Failed</Badge>}
+                    <td className="px-1 sm:px-2 py-1">
+                      {tx.isError === "0" ? <Badge variant="default" className="text-xs">Success</Badge> : <Badge variant="destructive" className="text-xs">Failed</Badge>}
                     </td>
-                    <td className="px-2 py-1">{tx.blockNumber}</td>
-                    <td className="px-2 py-1">{new Date(Number(tx.timeStamp) * 1000).toLocaleString()}</td>
-                    <td className="px-2 py-1">
-                      <a href={`https://sepolia.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline focus-visible:ring-2 focus-visible:ring-primary" aria-label="View on Etherscan">View</a>
+                    <td className="px-1 sm:px-2 py-1 hidden sm:table-cell">{tx.blockNumber}</td>
+                    <td className="px-1 sm:px-2 py-1 hidden sm:table-cell">{new Date(Number(tx.timeStamp) * 1000).toLocaleString()}</td>
+                    <td className="px-1 sm:px-2 py-1">
+                      <a href={`https://sepolia.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline focus-visible:ring-2 focus-visible:ring-primary text-xs" aria-label="View on Etherscan">View</a>
                     </td>
                   </tr>
                 ))}
@@ -450,41 +450,41 @@ export default function Web3Dashboard() {
             </table>
           </div>
         ) : (
-          <div className="text-center text-muted-foreground py-8">No transactions found.</div>
+          <div className="text-center text-muted-foreground py-6 sm:py-8 text-sm">No transactions found.</div>
         )}
       </div>
 
       {/* Botão e formulário de criação SEMPRE visíveis para conectados */}
       {isConnected && (
-        <div className="mb-6 flex justify-end">
-          <Button onClick={() => setShowForm(f => !f)} className="hover-lift focus-visible:ring-2 focus-visible:ring-primary" aria-label={showForm ? "Cancel" : "Create Vesting"}>
+        <div className="mb-4 sm:mb-6 flex justify-end">
+          <Button onClick={() => setShowForm(f => !f)} className="hover-lift focus-visible:ring-2 focus-visible:ring-primary text-sm sm:text-base" aria-label={showForm ? "Cancel" : "Create Vesting"}>
             {showForm ? "Cancel" : "Create Vesting"}
           </Button>
         </div>
       )}
       {showForm && (
-        <Card className="mb-8 max-w-xl mx-auto shadow-lg border-primary/30">
-          <CardContent>
-            <form onSubmit={handleFormSubmit} className="space-y-6">
-              <div className="mb-4">
-                <h3 className="text-xl font-bold mb-1 flex items-center gap-2">
-                  <Coins className="w-5 h-5 text-primary" />
+        <Card className="mb-6 sm:mb-8 max-w-xl mx-auto shadow-lg border-primary/30">
+          <CardContent className="p-4 sm:p-6">
+            <form onSubmit={handleFormSubmit} className="space-y-4 sm:space-y-6">
+              <div className="mb-3 sm:mb-4">
+                <h3 className="text-lg sm:text-xl font-bold mb-1 flex items-center gap-2">
+                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   Create New Vesting Contract
                 </h3>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Fill in the details below to create a new vesting contract on-chain.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block mb-1 font-medium" htmlFor="beneficiary">Beneficiary Address</label>
+                  <label className="block mb-1 font-medium text-sm" htmlFor="beneficiary">Beneficiary Address</label>
                   <input
                     type="text"
                     name="beneficiary"
                     id="beneficiary"
                     value={form.beneficiary}
                     onChange={handleFormChange}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background text-sm"
                     placeholder="0x..."
                     required
                     aria-label="Beneficiary Address"
@@ -493,14 +493,14 @@ export default function Web3Dashboard() {
                   {fieldErrors.beneficiary && <span className="text-xs text-destructive block mt-1">{fieldErrors.beneficiary}</span>}
                 </div>
                 <div>
-                  <label className="block mb-1 font-medium" htmlFor="token">Token Address</label>
+                  <label className="block mb-1 font-medium text-sm" htmlFor="token">Token Address</label>
                   <input
                     type="text"
                     name="token"
                     id="token"
                     value={form.token}
                     onChange={handleFormChange}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background text-sm"
                     placeholder="0x..."
                     required
                     aria-label="Token Address"
@@ -509,14 +509,14 @@ export default function Web3Dashboard() {
                   {fieldErrors.token && <span className="text-xs text-destructive block mt-1">{fieldErrors.token}</span>}
                 </div>
                 <div>
-                  <label className="block mb-1 font-medium" htmlFor="start">Start Date</label>
+                  <label className="block mb-1 font-medium text-sm" htmlFor="start">Start Date</label>
                   <input
                     type="date"
                     name="start"
                     id="start"
                     value={form.start}
                     onChange={handleFormChange}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background text-sm"
                     required
                     aria-label="Start Date"
                   />
@@ -524,14 +524,14 @@ export default function Web3Dashboard() {
                   {fieldErrors.start && <span className="text-xs text-destructive block mt-1">{fieldErrors.start}</span>}
                 </div>
                 <div>
-                  <label className="block mb-1 font-medium" htmlFor="cliffDuration">Cliff Duration (days)</label>
+                  <label className="block mb-1 font-medium text-sm" htmlFor="cliffDuration">Cliff Duration (days)</label>
                   <input
                     type="number"
                     name="cliffDuration"
                     id="cliffDuration"
                     value={form.cliffDuration}
                     onChange={handleFormChange}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background text-sm"
                     min="0"
                     placeholder="e.g. 30"
                     required
@@ -541,14 +541,14 @@ export default function Web3Dashboard() {
                   {fieldErrors.cliffDuration && <span className="text-xs text-destructive block mt-1">{fieldErrors.cliffDuration}</span>}
                 </div>
                 <div>
-                  <label className="block mb-1 font-medium" htmlFor="duration">Total Duration (days)</label>
+                  <label className="block mb-1 font-medium text-sm" htmlFor="duration">Total Duration (days)</label>
                   <input
                     type="number"
                     name="duration"
                     id="duration"
                     value={form.duration}
                     onChange={handleFormChange}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-background text-sm"
                     min="1"
                     placeholder="e.g. 180"
                     required
@@ -557,7 +557,7 @@ export default function Web3Dashboard() {
                   <span className="text-xs text-muted-foreground">Total vesting period</span>
                   {fieldErrors.duration && <span className="text-xs text-destructive block mt-1">{fieldErrors.duration}</span>}
                 </div>
-                <div className="flex items-center mt-6 md:mt-0">
+                <div className="flex items-center mt-4 sm:mt-6 sm:col-span-2">
                   <input
                     type="checkbox"
                     name="revocable"
@@ -567,29 +567,29 @@ export default function Web3Dashboard() {
                     className="mr-2 focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Revocable"
                   />
-                  <label htmlFor="revocable" className="font-medium">Revocable</label>
-                  <Badge variant="secondary" className="ml-2">Optional</Badge>
+                  <label htmlFor="revocable" className="font-medium text-sm">Revocable</label>
+                  <Badge variant="secondary" className="ml-2 text-xs">Optional</Badge>
                 </div>
               </div>
               {(formError || createError) && (
-                <div className="rounded bg-destructive/10 border border-destructive text-destructive px-4 py-2 text-sm flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
+                <div className="rounded bg-destructive/10 border border-destructive text-destructive px-3 sm:px-4 py-2 text-xs sm:text-sm flex items-center gap-2">
+                  <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                   {formError || String(createError)}
                 </div>
               )}
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)} aria-label="Cancel">
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)} aria-label="Cancel" className="text-sm">
                   Cancel
                 </Button>
-                <Button type="submit" className="hover-lift focus-visible:ring-2 focus-visible:ring-primary" disabled={isPending || isConfirming} aria-label="Create Vesting">
+                <Button type="submit" className="hover-lift focus-visible:ring-2 focus-visible:ring-primary text-sm" disabled={isPending || isConfirming} aria-label="Create Vesting">
                   {isPending || isConfirming ? (
-                    <span className="flex items-center gap-2"><Loader2 className="animate-spin w-4 h-4" /> Creating...</span>
+                    <span className="flex items-center gap-2"><Loader2 className="animate-spin w-3 h-3 sm:w-4 sm:h-4" /> Creating...</span>
                   ) : (
                     "Create Vesting"
                   )}
                 </Button>
               </div>
-              {isSuccess && <div className="text-green-600 mt-2">Vesting contract created successfully!</div>}
+              {isSuccess && <div className="text-green-600 mt-2 text-sm">Vesting contract created successfully!</div>}
             </form>
           </CardContent>
         </Card>
@@ -597,20 +597,20 @@ export default function Web3Dashboard() {
 
       {/* Mensagem de nenhum vesting ativo */}
       {noActiveVesting && (
-        <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="min-h-[40vh] flex items-center justify-center px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-md mx-auto"
           >
-            <div className="w-64 h-64 mx-auto mb-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-700 rounded-full flex items-center justify-center">
-              <Lock className="w-16 h-16 text-muted-foreground" />
+            <div className="w-48 h-48 sm:w-64 sm:h-64 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-700 rounded-full flex items-center justify-center">
+              <Lock className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground" />
             </div>
-            <h3 className="text-2xl font-semibold mb-4">No Active Vesting Contract</h3>
-            <p className="text-muted-foreground mb-8">
+            <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">No Active Vesting Contract</h3>
+            <p className="text-muted-foreground mb-6 sm:mb-8 text-sm sm:text-base">
               This wallet address doesn't have any active vesting contracts on the connected network.
             </p>
-            <div className="text-sm text-muted-foreground bg-muted p-4 rounded-lg">
+            <div className="text-xs sm:text-sm text-muted-foreground bg-muted p-3 sm:p-4 rounded-lg">
               <p>Connected to: <strong>{walletAddress}</strong></p>
               <p>Make sure you're on the correct network (Sepolia Testnet)</p>
             </div>
@@ -619,24 +619,24 @@ export default function Web3Dashboard() {
       )}
 
       {/* Wallet Balances Section */}
-      <div className="my-8">
-        <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <DollarSign className="w-6 h-6 text-primary" />
+      <div className="my-6 sm:my-8">
+        <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+          <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           Wallet Balances
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-2xl mx-auto">
           <Card className="border-primary/30">
-            <CardContent className="p-4 flex flex-col gap-2">
-              <span className="font-medium flex items-center gap-2"><Network className="w-4 h-4 text-primary" />ETH Balance</span>
-              <span className="text-lg font-mono">
+            <CardContent className="p-3 sm:p-4 flex flex-col gap-2">
+              <span className="font-medium flex items-center gap-2 text-sm"><Network className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />ETH Balance</span>
+              <span className="text-sm sm:text-lg font-mono">
                 {isLoadingEth ? 'Loading...' : ethBalance ? `${ethBalance.formatted} ETH` : '0.00 ETH'}
               </span>
             </CardContent>
           </Card>
           <Card className="border-primary/30">
-            <CardContent className="p-4 flex flex-col gap-2">
-              <span className="font-medium flex items-center gap-2"><Coins className="w-4 h-4 text-primary" />Token Balance</span>
-              <span className="text-lg font-mono">
+            <CardContent className="p-3 sm:p-4 flex flex-col gap-2">
+              <span className="font-medium flex items-center gap-2 text-sm"><Coins className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />Token Balance</span>
+              <span className="text-sm sm:text-lg font-mono">
                 {tokenAddress ? (
                   isLoadingToken ? 'Loading...' : tokenBalance && tokenDecimals && tokenSymbol ? `${(Number(tokenBalance) / 10 ** Number(tokenDecimals)).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenSymbol}` : '0.00'
                 ) : 'No token selected'}
