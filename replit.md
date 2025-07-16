@@ -57,6 +57,14 @@ Located in `shared/schema.ts`:
 
 ## Data Flow
 
+**Web3 Mode (NEW)**
+1. **Wallet Connection**: Real Web3 wallet connection via Wagmi + Viem
+2. **Smart Contract Interaction**: Direct calls to vesting contracts on Sepolia
+3. **Real-time Blockchain Data**: Live token balances and vesting information
+4. **Transaction Execution**: Actual blockchain transactions for token claims
+5. **Network Status**: Connection to Sepolia testnet with proper error handling
+
+**Mock Mode (Original)**
 1. **User Authentication**: Mock wallet connection provides a demo wallet address
 2. **Data Fetching**: React Query fetches vesting contracts from the API
 3. **Real-time Updates**: Optimistic updates when claiming tokens
@@ -71,6 +79,8 @@ Located in `shared/schema.ts`:
 - **Animations**: Framer Motion for enhanced user experience
 - **Forms**: React Hook Form with Zod validation
 - **Date Handling**: date-fns for date formatting and manipulation
+- **Web3 Integration**: Wagmi + Viem for blockchain interactions
+- **Wallet Connection**: Support for MetaMask and WalletConnect
 
 ### Backend Dependencies
 - **Database**: Drizzle ORM with PostgreSQL dialect

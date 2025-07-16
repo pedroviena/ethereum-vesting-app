@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Wallet, Check, Loader2 } from "lucide-react";
+import { Wallet, Loader2, ExternalLink } from "lucide-react";
 import { useWallet } from "@/hooks/use-wallet";
 import { motion } from "framer-motion";
 
@@ -20,6 +20,15 @@ export function WalletConnect() {
         <div className="text-sm font-mono text-muted-foreground">
           {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.open(`https://sepolia.etherscan.io/address/${walletAddress}`, '_blank')}
+          className="hover-lift"
+        >
+          <ExternalLink className="mr-1 h-3 w-3" />
+          View
+        </Button>
         <Button
           variant="outline"
           size="sm"

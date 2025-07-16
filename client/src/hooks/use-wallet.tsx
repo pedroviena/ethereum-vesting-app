@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext } from "react";
+import { useConnect, useDisconnect, useAccount } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
 
 interface WalletContextValue {
   isConnected: boolean;
-  walletAddress: string | null;
+  walletAddress: `0x${string}` | null;
   isConnecting: boolean;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
@@ -12,43 +13,29 @@ interface WalletContextValue {
 const WalletContext = createContext<WalletContextValue | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [isConnected, setIsConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
+  const { connect, connectors, isPending } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { address, isConnected } = useAccount();
   const { toast } = useToast();
 
-  // Mock wallet address for demonstration
-  const mockWalletAddress = "0x742d35Cc6634C0532925a3b8D000000000000000";
-
   const connectWallet = async () => {
-    setIsConnecting(true);
-    
     try {
-      // Simulate wallet connection delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setIsConnected(true);
-      setWalletAddress(mockWalletAddress);
-      
-      toast({
-        title: "Wallet Connected",
-        description: `Successfully connected to ${mockWalletAddress.slice(0, 6)}...${mockWalletAddress.slice(-4)}`,
-      });
+      // Connect to the first available connector (usually MetaMask)
+      const connector = connectors.find(c => c.id === 'injected') || connectors[0];
+      if (connector) {
+        connect({ connector });
+      }
     } catch (error) {
       toast({
         title: "Connection Failed",
         description: "Failed to connect wallet. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsConnecting(false);
     }
   };
 
   const disconnectWallet = () => {
-    setIsConnected(false);
-    setWalletAddress(null);
-    
+    disconnect();
     toast({
       title: "Wallet Disconnected",
       description: "Your wallet has been disconnected.",
@@ -58,8 +45,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   return (
     <WalletContext.Provider value={{
       isConnected,
-      walletAddress,
-      isConnecting,
+      walletAddress: address || null,
+      isConnecting: isPending,
       connectWallet,
       disconnectWallet,
     }}>

@@ -1,6 +1,7 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -11,9 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, Coins } from "lucide-react";
 import { motion } from "framer-motion";
 import Dashboard from "@/pages/dashboard";
+import Web3Dashboard from "@/pages/web3-dashboard";
 import NotFound from "@/pages/not-found";
+import { config } from "@/lib/web3";
+import { useState } from "react";
 
-function Navigation() {
+function Navigation({ isWeb3Mode, setIsWeb3Mode }: { isWeb3Mode: boolean; setIsWeb3Mode: (mode: boolean) => void }) {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -32,6 +36,14 @@ function Navigation() {
           </motion.div>
           
           <div className="flex items-center space-x-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsWeb3Mode(!isWeb3Mode)}
+              className="hover-lift"
+            >
+              {isWeb3Mode ? "Mock Mode" : "Web3 Mode"}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -53,9 +65,11 @@ function Navigation() {
 }
 
 function AppContent() {
+  const [isWeb3Mode, setIsWeb3Mode] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
+      <Navigation isWeb3Mode={isWeb3Mode} setIsWeb3Mode={setIsWeb3Mode} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
@@ -65,12 +79,15 @@ function AppContent() {
         >
           <h1 className="text-4xl font-bold mb-4">Token Vesting Dashboard</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Manage your vesting contracts and claim tokens seamlessly on Ethereum
+            {isWeb3Mode 
+              ? "Connect your wallet and claim tokens directly from smart contracts"
+              : "Manage your vesting contracts and claim tokens seamlessly on Ethereum"
+            }
           </p>
         </motion.div>
 
         <Switch>
-          <Route path="/" component={Dashboard} />
+          <Route path="/" component={isWeb3Mode ? Web3Dashboard : Dashboard} />
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -80,16 +97,18 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <WalletProvider>
-          <TooltipProvider>
-            <Toaster />
-            <AppContent />
-          </TooltipProvider>
-        </WalletProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <WalletProvider>
+            <TooltipProvider>
+              <Toaster />
+              <AppContent />
+            </TooltipProvider>
+          </WalletProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 

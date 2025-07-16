@@ -96,7 +96,9 @@ export class MemStorage implements IStorage {
     const id = this.currentContractId++;
     const contract: VestingContract = {
       ...insertContract,
-      id
+      id,
+      cliffDate: insertContract.cliffDate || null,
+      isActive: insertContract.isActive ?? true
     };
     this.vestingContracts.set(id, contract);
     return contract;
