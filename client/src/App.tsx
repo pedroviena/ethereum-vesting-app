@@ -22,10 +22,6 @@ import * as Sentry from "@sentry/react";
 
 Sentry.init({
   dsn: "https://examplePublicKey@o0.ingest.sentry.io/0", // Troque pelo seu DSN real
-  integrations: [
-    new Sentry.BrowserTracing(),
-    new Sentry.Replay(),
-  ],
   tracesSampleRate: 1.0,
   environment: import.meta.env.MODE,
 });
